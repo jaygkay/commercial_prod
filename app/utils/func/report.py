@@ -14,21 +14,17 @@ def DF_SUMMARY(df_revenue, the_period):
     df_summ_rev['doct_pct'] = round(df_summ_rev['doct'].pct_change() * 100,2)
     return df_summ_rev
 
-
-def GRAPH_FIRST_IN(df_first_in_thus, the_period):
-    # period_type = 'month'
-    the_df = df_first_in_thus[df_first_in_thus['period_type'] == str(the_period)].sort_values(['period','rank'])
-
+def GRAPH_FRIST_IN22(df_first_in_thus, the_period):
+    the_df = df_first_in_thus[df_first_in_thus['period_type'] == str(the_period).lower()].sort_values(['period'])
+    if the_period == 'WEEK':
+        the_df['period'] = [i.split("(")[1].split()[0] for i in the_df['period']]
     fig = px.scatter(
         the_df,
         x='period',
         y='rank',
-        size='tid',
-        hover_name='hosp_name',
-        # text = 'hosp_name',
+        text='hosp_name',
         color='hosp_cate',
         title=str(the_df.hosp_name.nunique()),
-        height = 400,
         category_orders={
             'hosp_cate': ['상급종합병원', '종합병원', '의원', '병원'],
             'period': sorted(the_df.period.unique())
@@ -36,9 +32,48 @@ def GRAPH_FIRST_IN(df_first_in_thus, the_period):
         color_discrete_sequence=["#636EFA", "#EF553B", "#19D3F3", "#00CC96"],
         template='plotly_white'
     )
+    fig.update_layout(
+        legend=dict(x=0.5, y=1.1, xanchor='center', yanchor='top'),
+        legend_orientation='h'
+    )
+    fig.update_xaxes(dtick='M1', tickformat='%b\n%Y')
     fig.update_layout(margin=dict(t=0, l=0, r=0, b=0))
     fig.for_each_trace(lambda t: t.update(textfont_color=t.marker.color, textposition='top center'))
+    fig = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return fig
 
+
+def GRAPH_FIRST_IN(df_first_in_thus, the_period):
+    # period_type = 'month'
+    the_df = df_first_in_thus[df_first_in_thus['period_type'] == str(the_period).lower()].sort_values(['period', 'rank'])
+    if the_period == 'WEEK':
+        the_df['period'] = [i.split("(")[1].split()[0] for i in the_df['period']]
+    fig = px.scatter(
+        the_df,
+        x='period',
+        y='rank',
+        size='tid',
+        size_max=70,
+        hover_name='hosp_name',
+        # facet_row = 'prsc_year',
+        text = 'hosp_name',
+        color='hosp_cate',
+        title=str(the_df.hosp_name.nunique()),
+        height=800,
+        category_orders={
+            'hosp_cate': ['상급종합병원', '종합병원', '의원', '병원'],
+            'period': sorted(the_df.period.unique())
+        },
+        color_discrete_sequence=["#636EFA", "#EF553B", "#19D3F3", "#00CC96"],
+        template='plotly_white'
+    )
+    fig.update_traces(textfont_size=9)
+
+    fig.update_layout(
+        legend=dict(x=0.5, y=1.1, xanchor='center', yanchor='top'),
+        legend_orientation='h'
+    )
+    fig.update_xaxes(dtick='M1', tickformat='%b\n%Y')
     fig.update_layout(margin=dict(t=0, l=0, r=0, b=0))
     fig.for_each_trace(lambda t: t.update(textfont_color=t.marker.color, textposition='top center'))
     fig = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -354,16 +389,28 @@ def GET_WEEK_PARAMS(df_hosp):
 
 
 def GET_STATUS_NUMBER(df_summary, this_week):
-    df = df_summary[df_summary['period'] == str(this_week)].groupby(['period']).agg({
+    df1 = df_summary[(df_summary['period'] == str(this_week)) & (df_summary['tid'].notnull())].groupby(['period']).agg({
         'hosp_cate': 'nunique',
         'hosp_name': 'nunique',
         'doctors': 'nunique',
         'tid': 'sum',
-        'upld_id': 'sum',
-        'rept_id': 'sum',
     }).sort_values('tid', ascending=False).reset_index()
 
+    df2 = df_summary[(df_summary['period'] == str(this_week))].groupby(['period']).agg({
+        'upld_id': 'sum',
+        'rept_id': 'sum',
+    }).reset_index()
+    df2
 
+    df = pd.merge(
+        df1,
+        df2,
+        on='period',
+        how='left'
+    )
+    df['tid'] = df['tid'].astype(int)
+    df['upld_id'] = df['upld_id'].astype(int)
+    df['rept_id'] = df['rept_id'].astype(int)
 
     return df
 
@@ -420,31 +467,9 @@ def GRAPH_DOCTORS_TID(df_summary, the_period):
         ['period_label', 'hosp_cate_label', 'hosp_name_label', 'doct_name_label', 'tid', ]]
     the_df_hosp33.columns = [i.replace("_label", "") for i in the_df_hosp33.columns]
 
-    # ### 버튼
-    # periods = the_df_hosp33['period'].unique()
-    #
-    # buttons = []
-    # for period in periods:
-    #     # 해당 기간의 데이터 필터링
-    #     df_filtered = the_df_hosp33[the_df_hosp33['period'] == period]
-    #
-    #     # 버튼 추가
-    #     buttons.append(dict(
-    #         method='restyle',
-    #         label=period,
-    #         args=[{
-    #             'transforms': [{
-    #                 'type': 'filter',
-    #                 'target': the_df_hosp33['period'],
-    #                 'operation': '=',
-    #                 'value': period
-    #             }]
-    #         }]
-    #     ))
-
 
     fig = px.treemap(
-        the_df_hosp33,
+        the_df_hosp33[the_df_hosp33['tid']!=0],
         path=[
             px.Constant("TOTAL (" + str(the_df_hosp33.tid.sum()).replace(".0", "") + ")"),
             'hosp_cate', 'hosp_name', 'doct_name', 'tid'

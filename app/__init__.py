@@ -6,4 +6,4 @@ app.config.from_object(Config)
 app.debug = True
 
 from app import routes
-from app.routes import *
+# from app.routes import *

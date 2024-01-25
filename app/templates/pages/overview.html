@@ -13,27 +13,52 @@
 
         <div><hr class = "light-hr"></div>
         <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
-            <h4 class = "fs-4">ACTIVE DEVICES</h4>
-            <div id = "ACTIVE_SID"></div>
-        </div>
-
-        <div><hr class = "light-hr"></div>
-        <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
-            <h4 class = "fs-4">OPERATIONS</h4>
+            <h4 class = "fs-4">메모패치 오페레이션 처방/업로드/레포트 현황</h4>
             <div id = "MEMO_OPS_COUNT"></div>
         </div>
 
         <div><hr class = "light-hr"></div>
         <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
-            <h4 class = "fs-4">PRESCIPRION BY HOSPITAL CATEGORY</h4>
+            <h4 class = "fs-4">기간별 처방 병원 트렌드</h4>
+            <div id = "GRAPH_BY_HOSPITAL"></div>
+        </div>
+
+        <div><hr class = "light-hr"></div>
+        <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
+            <h4 class = "fs-4">기간별 처방 의사 트렌드</h4>
+            <div id = "GRAPH_BY_DOCTOR"></div>
+        </div>
+
+        <div><hr class = "light-hr"></div>
+        <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
+            <h4 class = "fs-4">기간별 처방 구간의 처방 트렌드</h4>
+            <div id = "GRAPH_BY_PRSC_PERIOD"></div>
+        </div>
+
+        <div><hr class = "light-hr"></div>
+        <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
+            <h4 class = "fs-4">기간별 요양기관의 처방 트렌드 비교</h4>
+            <div id = "PRSC_COMPARING_BY_HOSPITAL"></div>
+        </div>
+
+        <div><hr class = "light-hr"></div>
+        <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
+            <h4 class = "fs-4">기간별 요양기관의 처방 트렌드</h4>
             <div id = "PRSC_BY_HOSPITAL"></div>
         </div>
 
         <div><hr class = "light-hr"></div>
         <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
-            <h4 class = "fs-4">LEADTIME</h4>
+            <h4 class = "fs-4">기간별 순 사용 기기 트렌드</h4>
+            <div id = "ACTIVE_SID"></div>
+        </div>
+
+        <div><hr class = "light-hr"></div>
+        <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
+            <h4 class = "fs-4">기간별 처방/업로드/레포트 리드타임 트렌드</h4>
             <div id = "LEADTIME_STATUS"></div>
         </div>
+
         <div><hr class = "light-hr"></div>
 
 
@@ -46,14 +71,26 @@
     var graphs = {{ACTIVE_SID | safe}};
     Plotly.plot('ACTIVE_SID',graphs,{});
 
+    var graphs = {{GRAPH_BY_PRSC_PERIOD | safe}};
+    Plotly.plot('GRAPH_BY_PRSC_PERIOD',graphs,{});
+
     var graphs = {{PRSC_BY_HOSPITAL | safe}};
     Plotly.plot('PRSC_BY_HOSPITAL',graphs,{});
+
+    var graphs = {{PRSC_COMPARING_BY_HOSPITAL | safe}};
+    Plotly.plot('PRSC_COMPARING_BY_HOSPITAL',graphs,{});
 
     var graphs = {{MEMO_OPS_COUNT | safe}};
     Plotly.plot('MEMO_OPS_COUNT',graphs,{});
 
     var graphs = {{LEADTIME_STATUS | safe}};
     Plotly.plot('LEADTIME_STATUS',graphs,{});
+
+    var graphs = {{GRAPH_BY_HOSPITAL | safe}};
+    Plotly.plot('GRAPH_BY_HOSPITAL',graphs,{});
+
+    var graphs = {{GRAPH_BY_DOCTOR | safe}};
+    Plotly.plot('GRAPH_BY_DOCTOR',graphs,{});
 
 </script>
 

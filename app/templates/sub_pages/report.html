@@ -96,11 +96,12 @@
             <h4 class = "fs-5 mt-4">PRESCRIPTIONS BY PERIOD</h4>
             <div id = "GRAPH_ANI"></div>
 
-<!--            <h4 class = "fs-5">입점 병원</h4>-->
-<!--            <div id = "GRAPH_FIRST_IN"></div>-->
+            <h4 class = "fs-5">병원별 입점 시기</h4>
+            <div id = "GRAPH_FRIST_IN22"></div>
 
-<!--            <h4 class = "fs-5">처방 구간</h4>-->
-<!--            <div id = "GRAPH_PIE"></div>-->
+            <h4 class = "fs-5">병원별 입점 시기 및 처방수</h4>
+            <div id = "GRAPH_FIRST_IN"></div>
+
         </div>
 
         <div><hr class = "light-hr"></div>
@@ -124,11 +125,11 @@
     var graphs = {{graph_last_week_doct | safe}};
     Plotly.plot('graph_last_week_doct',graphs,{});
 
-    var graphs = {{GRAPH_PIE | safe}};
-    Plotly.plot('GRAPH_PIE',graphs,{});
-
     var graphs = {{GRAPH_FIRST_IN | safe}};
     Plotly.plot('GRAPH_FIRST_IN',graphs,{});
+
+    var graphs = {{GRAPH_FRIST_IN22 | safe}};
+    Plotly.plot('GRAPH_FRIST_IN22',graphs,{});
 
     function setThePeriodAndSubmit(thePeriodValue) {
         document.getElementById('hidden_the_period').value = thePeriodValue;

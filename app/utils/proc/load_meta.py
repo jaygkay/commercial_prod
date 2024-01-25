@@ -2,6 +2,14 @@ from gspread_dataframe import get_as_dataframe
 from app.utils.constant import env
 import folium
 
+def GET_KPI(sheet_name):
+    the_url = "https://docs.google.com/spreadsheets/d/1J-0XQWqVyXLbgJ3t9UrSjVT5d2qkyciakYuG8t4OrYs/edit#gid=0"
+    sh = env.gc.open_by_url(the_url)
+    df = get_as_dataframe(sh.worksheet(str(sheet_name)))
+    df = df[[i for i in df.columns if 'Unn' not in i]]
+    df = df.dropna(subset=[df.columns[0]])
+    return df
+
 def GET_THE_DATA(the_sheet):
     #### 구글 드라이브 접근 폴더 설정
 

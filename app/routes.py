@@ -1,6 +1,6 @@
 ### PACKAGES FOR ENVIRONMENT
 from app import app
-from app.utils.func import home, realtime, crm_doctor, crm_hospital, devices, analytics, sub_page, overview, report
+from app.utils.func import home, realtime, crm_doctor, crm_hospital, devices, analytics, sub_page, overview, report, kpi
 from app.utils.proc import load_meta, proc
 from flask import render_template, request, redirect, url_for
 from app.utils.constant import constant
@@ -8,6 +8,36 @@ from app.utils.constant import constant
 from pytrends.request import TrendReq
 from datetime import datetime, timedelta
 import pandas as pd
+
+@app.route('/kpi', methods=['GET', 'POST'])
+def func_kpi():
+    df_new_hosp = load_meta.GET_KPI("1.신규 입점 병원")
+
+    ## 입점 병원
+    df_new_hosp_year = df_new_hosp[
+        (df_new_hosp['period_type'] == 'YEAR') & (df_new_hosp['period'] != 'Y2024')
+    ]
+    new_hosp_lst = [df_new_hosp_year['hosp_cnt'].iloc[-1],
+                    df_new_hosp_year['hosp_cnt'].iloc[0],
+                    df_new_hosp_year['pct_change'].iloc[-1]]
+
+    # df_master = load_meta.GET_THE_DATA("MASTER_SUMMARY")
+    # GRAPH_PRSC = kpi.GRAPH_OPERATIONS(df_master, 'tid')
+    # GRAPH_UPLD = kpi.GRAPH_OPERATIONS(df_master, 'tid')
+    # GRAPH_REPT = kpi.GRAPH_OPERATIONS(df_master, 'tid')
+    # TEST = kpi.TEST()
+    return render_template(
+        'pages/kpi.html', zip=zip,
+        new_hosp_lst=new_hosp_lst
+    )
+
+    #     TEST=TEST,
+    #     GRAPH_PRSC=GRAPH_PRSC,
+    #     GRAPH_UPLD=GRAPH_UPLD,
+    #     GRAPH_REPT=GRAPH_REPT,
+    #
+    # )
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def func_dashboard():
     df_thug = load_meta.GET_THE_DATA("STAT_BY_PERIOD")
@@ -28,10 +58,18 @@ def func_overview():
     # df_thug = load_meta.GET_THE_DATA("SUMMARY_TOTAL")
     df_thug = load_meta.GET_THE_DATA("STAT_BY_PERIOD")
     df_thug2 = load_meta.GET_THE_DATA("STAT_BY_HOSPITAL")
+    df_thug3 = load_meta.GET_THE_DATA("STAT_BY_DOCTOR")
+
+    ### FUNCTIONS
     ACTIVE_SID = overview.ACTIVE_SID(df_thug)
     MEMO_OPS_COUNT = overview.MEMO_OPS_COUNT(df_thug)
     LEADTIME_STATUS = overview.LEADTIME_STATUS(df_thug)
     PRSC_BY_HOSPITAL = overview.PRSC_BY_HOSPITAL(df_thug2)
+    PRSC_COMPARING_BY_HOSPITAL= overview.PRSC_COMPARING_BY_HOSPITAL(df_thug2)
+    GRAPH_BY_HOSPITAL = overview.GRAPH_BY_HOSPITAL(df_thug)
+    GRAPH_BY_DOCTOR = overview.GRAPH_BY_DOCTOR(df_thug)
+    GRAPH_BY_PRSC_PERIOD = overview.GRAPH_BY_PRSC_PERIOD(df_thug3)
+
 
 
     return render_template(
@@ -41,6 +79,10 @@ def func_overview():
         MEMO_OPS_COUNT=MEMO_OPS_COUNT,
         LEADTIME_STATUS=LEADTIME_STATUS,
         PRSC_BY_HOSPITAL=PRSC_BY_HOSPITAL,
+        PRSC_COMPARING_BY_HOSPITAL=PRSC_COMPARING_BY_HOSPITAL,
+        GRAPH_BY_HOSPITAL=GRAPH_BY_HOSPITAL,
+        GRAPH_BY_DOCTOR=GRAPH_BY_DOCTOR,
+        GRAPH_BY_PRSC_PERIOD=GRAPH_BY_PRSC_PERIOD,
 
     )
 
@@ -51,13 +93,6 @@ def func_report():
     # df_summary = load_meta.GET_THE_DATA("STAT_BY_DOCTOR")
     df_summary = load_meta.GET_THE_DATA("MASTER_SUMMARY")
     df_first_in_thus = load_meta.GET_THE_DATA("FIRST_IN")
-    # ### period variable
-    # the_date = str(datetime.now()).split()[0]
-    # the_month = str(datetime.now()).split()[0][:7]
-    # the_quarter = report.GET_QUARTER(the_date)
-    # the_year = 'Y'+str(datetime.now()).split()[0][:4]
-    # this_week, week_last, week_prev = report.GET_WEEK_PARAMS(df_summary)
-    # the_year, the_month, the_quarter, week_last, the_date
 
     #### Data Load
     df_hosp = load_meta.GET_THE_DATA("MASTER_HOSP")
@@ -85,6 +120,7 @@ def func_report():
 
     #### table for the digits
     df_week_last = report.GET_STATUS_NUMBER(df_summary, the_range)
+    df_week_last = [str(i).replace(".0","") for i in df_week_last.values[0]]
     # print(df_week_last)
     #### doctors
     graph_last_week_doct = report.GRAPH_DOCTORS_TID(df_summary, the_range)
@@ -94,12 +130,13 @@ def func_report():
     GRAPH_ANI = report.GRAPH_ANIMATED(df_hosp, the_period)
     GRAPH_PIE = report.GRAPH_PIE(df_hosp, the_period)
     GRAPH_FIRST_IN = report.GRAPH_FIRST_IN(df_first_in_thus, the_period)
+    GRAPH_FRIST_IN22 = report.GRAPH_FRIST_IN22(df_first_in_thus, the_period)
 
     return render_template(
         'sub_pages/report.html', zip=zip,
         range_lst=range_lst, the_range=the_range,
         ### last week
-        df_week_last=df_week_last.values[0].tolist(),
+        df_week_last=df_week_last,#.values[0].tolist(),
         graph_last_week_doct=graph_last_week_doct,
 
         the_period=the_period,
@@ -108,6 +145,7 @@ def func_report():
         GRAPH_ANI=GRAPH_ANI,
         GRAPH_PIE=GRAPH_PIE,
         GRAPH_FIRST_IN=GRAPH_FIRST_IN,
+        GRAPH_FRIST_IN22=GRAPH_FRIST_IN22,
         # SCATTER_WEEKLY_HOSP_CHANGE=SCATTER_WEEKLY_HOSP_CHANGE,
         # SCATTER_WEEKLY_DOCT_CHANGE=SCATTER_WEEKLY_DOCT_CHANGE,
     )
